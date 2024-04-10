@@ -1,12 +1,14 @@
 // See https://kit.svelte.dev/docs/types#app
+
+import type { AuthModel } from "pocketbase";
+
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
+		interface Locals {
+			pb: Pocketbase;
+			user: AuthModel | undefined;
+		}
 	}
 }
 
