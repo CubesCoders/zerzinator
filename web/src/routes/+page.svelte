@@ -125,7 +125,7 @@
 					</div>
 				{:else}
 					<div>
-						<p class="text-center">Keine Spieler.</p>
+						<p class="text-center p-2 text-muted-foreground">Keine Spieler angemeldet.</p>
 					</div>
 				{/each}
 			{:else}
@@ -154,7 +154,7 @@
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
-						class="w-[200px] justify-between"
+						class="max-w-96 justify-between"
 					>
 						{selectedValue}
 						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -220,7 +220,7 @@
 					</div>
 				{:else}
 					<div>
-						<p class="text-center">Noch keine Votes vorhanden.</p>
+						<p class="text-center p-2 text-muted-foreground">Noch keine Votes vorhanden.</p>
 					</div>
 				{/each}
 			{:else}
