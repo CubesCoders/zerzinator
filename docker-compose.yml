@@ -15,7 +15,11 @@ services:
       - ./pocketbase/pb_hooks:/pb/pb_hooks
   web:
     restart: 'always'
-    build: './web'
+    build: 
+      context: './web'
+      dockerfile: 'Dockerfile'
+      args:
+        PUBLIC_DATABASE: ${PUBLIC_DATABASE:-http://localhost:8081}
     ports:
       - ${PORTWEB:-8080}:3001
     expose:
