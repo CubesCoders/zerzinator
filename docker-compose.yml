@@ -17,7 +17,7 @@ services:
     restart: 'always'
     image: 'node:20-alpine'
     working_dir: '/app'
-    command: sh -c "npm install && npm run build && npm run start"
+    command: sh -c "npm install && npm run build && node /app/build/index.js"
     ports:
       - ${PORTWEB:-8080}:3001
     expose:
