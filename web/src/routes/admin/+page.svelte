@@ -2,7 +2,7 @@
 <script lang="ts">
 	import * as Popover from '@/components/ui/popover';
 	import * as Command from '@/components/ui/command';
-	import { animals, event } from '@/store';
+	import { animals, event, tips } from '@/store';
 	import { Button } from '@/components/ui/button';
 	import { Check, ChevronsUpDown } from 'lucide-svelte';
 	import { cn } from '@/utils';
@@ -39,6 +39,11 @@
         }
     }
 
+    // if more people tip on the same animal, the points will decrease
+    function getDynamicPoints(points: number, tipCount: number) {
+        return points * (1 / tipCount);
+    }
+
     async function setAnimal() {
         if (!$event) return;
         if (!selectedEntry) return;
@@ -51,20 +56,23 @@
             alert('Ein Tier wurde bereits ausgewählt.');
             return;
         }
+
         const entry = selectedEntry;
         pb.collection('events').update($event.id, {
             animal: entry.value
         });
 
-        const tips = await pb.collection("tips").getFullList({
+        const singleTips = await pb.collection("tips").getFullList({
             filter: `event = "${$event.id}"`,
             expand: "user,animal"
         }) as TipsResponse<{user: UsersResponse, animal: AnimalsResponse}>[];
 
+        let tipCount = singleTips.length;
+
         const animal = $animals.find((animal) => animal.id === entry.value);
         if (!animal) return;
 
-        for (const tip of tips) {
+        for (const tip of singleTips) {
             if (tip.animal === animal.id) {
                 await pb.collection("users").update(tip.user, {
                     points: (tip.expand?.user?.points ?? 0) + 500
