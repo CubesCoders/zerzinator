@@ -19,14 +19,14 @@ services:
       context: './web'
       dockerfile: 'Dockerfile'
       args:
-        PUBLIC_DATABASE: ${PUBLIC_DATABASE:-http://localhost:8081}
+        PUBLIC_DATABASE: ${PUBLIC_DATABASE:-https://api.cc-web.cloud/zerzinator}
     ports:
       - ${PORTWEB:-8080}:3001
     expose:
       - 3001
     environment:
       PORT: 3001
-      PUBLIC_DATABASE: ${PUBLIC_DATABASE:-http://localhost:8081}
+      PUBLIC_DATABASE: ${PUBLIC_DATABASE:-https://api.cc-web.cloud/zerzinator}
 
 volumes:
   dbdata:
