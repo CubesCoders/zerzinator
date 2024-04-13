@@ -16,4 +16,4 @@ COPY --from=builder /app/build .
 
 EXPOSE 3001
 
-ENTRYPOINT [ "ORIGIN=https://zerzinator.cc-web.cloud", "bun", "index.js" ]
+ENTRYPOINT [ "bun", "index.js" ]
