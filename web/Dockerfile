@@ -17,4 +17,4 @@ ENV ORIGIN="https://zerzinator.cc-web.cloud"
 
 EXPOSE 3001
 
-CMD [ "ORIGIN=https://zerzinator.cc-web.cloud", "bun", "index.js" ]
+CMD [ "bun", "index.js" ]
