@@ -2,7 +2,7 @@ FROM oven/bun as builder
 
 ARG PUBLIC_DATABASE
 ENV PUBLIC_DATABASE=${PUBLIC_DATABASE}
-ENV ORIGIN=https://zerzinator.cc-web.cloud/
+ENV ORIGIN=https://zerzinator.cc-web.cloud
 
 WORKDIR /app
 
