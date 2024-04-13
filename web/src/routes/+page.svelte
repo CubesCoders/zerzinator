@@ -12,8 +12,6 @@
 	import { animals, event, fetchAnimals, fetchEvent, fetchLeaderBoard, fetchTips, leaderBoard, tips } from '@/store';
 
 	export let data: PageData;
-
-	console.log(data);
 	// let animals: {[keys: string]: string[]} = untypedSpecies;
 
 	$: animalValues = ($animals ?? []).map((animal) => ({ value: animal.id, label: animal.name }));
@@ -77,10 +75,10 @@
 			}
 		}
 
-		if (!$animals) {
+		/* if (!$animals) {
 			await fetchAnimals();
-			animalValues = $animals!.map((animal) => ({ value: animal.id, label: animal.name }))
-		}
+			animalValues = 
+		} */
 	});
 
 	async function voteForAnimal(tip: string) {
