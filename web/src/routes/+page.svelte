@@ -66,10 +66,6 @@
 	} */
 
 	onMount(async () => {
-		fetchEvent();
-		fetchTips();
-		fetchLeaderBoard();
-		console.log(pb.authStore.model);
 		if (data.user) {
 			try {
 				vote = await pb.collection('tips').getFirstListItem(`user="${data.user.id}"`, {

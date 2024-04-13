@@ -25,7 +25,6 @@ export const actions: Actions = {
         const { email, password } = form.data;
         try {
             await event.locals.pb.collection('users').authWithPassword(email, password);
-            console.log('logged in');
         } catch (e) {
             return fail(401, {
                 loginForm: form,
