@@ -1,4 +1,4 @@
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import { pb } from './pocketbase/client';
 import type {
 	AnimalsResponse,
@@ -23,7 +23,7 @@ export const tips: Writable<null | TipsCalcResponse<unknown>[]> = writable(null)
 
 export const fetchTips = async () => {
 	try {
-		const res = await pb.collection('tips_calc').getFullList();
+		const res = await pb.collection('tips_calc').getFullList({filter: `event="${get(event)?.id}"`});
 		tips.set(res);
 	} catch (e) {
 		console.error(e);

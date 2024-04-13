@@ -3,13 +3,23 @@
 	// import untypedSpecies from '../assets/animals.json';
 	import * as Popover from '@/components/ui/popover';
 	import * as Command from '@/components/ui/command';
+	import * as Table from '@/components/ui/table';
 	import { Button } from '@/components/ui/button';
 	import { ArrowBigUpIcon, ChevronsUpDown, Check, UserRoundIcon } from 'lucide-svelte';
 	import { cn } from '@/utils';
 	import { pb } from '@/pocketbase/client';
 	import type { PageData } from './$types';
 	import type { AnimalsRecord, AnimalsResponse, TipsResponse } from '@/pocketbase';
-	import { animals, event, fetchAnimals, fetchEvent, fetchLeaderBoard, fetchTips, leaderBoard, tips } from '@/store';
+	import {
+		animals,
+		event,
+		fetchAnimals,
+		fetchEvent,
+		fetchLeaderBoard,
+		fetchTips,
+		leaderBoard,
+		tips
+	} from '@/store';
 
 	export let data: PageData;
 	// let animals: {[keys: string]: string[]} = untypedSpecies;
@@ -20,21 +30,20 @@
 	let value = '';
 	let animalSearchValue = '';
 
-	$: selectedValue =
-		selectedEntry?.label ?? 'Wähle ein neues Tier aus...';
+	$: selectedValue = selectedEntry?.label ?? 'Wähle ein neues Tier aus...';
 	$: selectedEntry = animalValues.find((animal) => animal.value === value);
 	$: lazyLoadingNumber = 50;
-	$: filteredAnimalValues = animalValues.filter((animal) =>
-		animal.label.toLowerCase().includes(animalSearchValue.toLowerCase())
-	).slice(0, lazyLoadingNumber);
+	$: filteredAnimalValues = animalValues
+		.filter((animal) => animal.label.toLowerCase().includes(animalSearchValue.toLowerCase()))
+		.slice(0, lazyLoadingNumber);
 
 	$: date = new Date($event?.start ?? 0);
 	// countdown
-	$: countdown = new Date((date.getTime() + (1000 * 60 * 30)) - Date.now());
+	$: countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
 	$: voteOver = countdown.getTime() <= 0 || $event?.animal !== undefined;
 
 	setInterval(() => {
-		countdown = new Date((date.getTime() + (1000 * 60 * 30)) - Date.now());
+		countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
@@ -52,7 +61,7 @@
 		}
 	}
 
-	let vote: undefined | TipsResponse<{animal: AnimalsResponse}> = undefined;
+	let vote: undefined | TipsResponse<{ animal: AnimalsResponse }> = undefined;
 
 	/* function parseAnimals() {
 		for (const specie of Object.keys(animals)) {
@@ -67,7 +76,7 @@
 		if (data.user) {
 			try {
 				vote = await pb.collection('tips').getFirstListItem(`user="${data.user.id}"`, {
-					expand: "animal"
+					expand: 'animal'
 				});
 			} catch (error) {
 				vote = undefined;
@@ -85,13 +94,20 @@
 		if (!data.user) return;
 		if (voteOver) return;
 		if (vote) {
-			vote = await pb.collection('tips').update(vote.id, { animal: tip }, {
-				expand: "animal"
-			});
+			vote = await pb.collection('tips').update(
+				vote.id,
+				{ animal: tip },
+				{
+					expand: 'animal'
+				}
+			);
 		} else {
-			vote = await pb.collection('tips').create({ user: data.user.id, animal: tip }, {
-				expand: "animal"
-			});
+			vote = await pb.collection('tips').create(
+				{ user: data.user.id, animal: tip },
+				{
+					expand: 'animal'
+				}
+			);
 		}
 		fetchTips();
 	}
@@ -103,29 +119,29 @@
 
 <div class="container flex py-2 pt-8">
 	<div class="w-48">
-		<h2 class="mb-4 text-xl font-semibold">Leaderboard</h2>
-		<div class="mt-4 grid w-full rounded-sm border">
+		<h2 class="mb-4 text-center text-xl font-semibold">Leaderboard</h2>
+		<div class="mt-4">
 			{#if $leaderBoard}
-				<div class="flex w-full items-center justify-between gap-2 border-b py-1 last:border-b-0">
-					<p class="w-full pl-1 font-semibold">Name</p>
-					<div class="flex items-center">
-						<span class="h-8 w-[1px] bg-border"></span>
-						<p class="w-14 text-center font-semibold">Punkte</p>
-					</div>
-				</div>
-				{#each $leaderBoard as user}
-					<div class="flex w-full items-center justify-between gap-2 border-b py-1 last:border-b-0">
-						<p class="line-clamp-1 w-full pl-1">{user.username}</p>
-						<div class="flex items-center">
-							<span class="h-8 w-[1px] bg-border"></span>
-							<p class="w-14 text-center">{user.points}</p>
-						</div>
-					</div>
-				{:else}
-					<div>
-						<p class="text-center p-2 text-muted-foreground">Keine Spieler angemeldet.</p>
-					</div>
-				{/each}
+				<Table.Root>
+					<Table.Header>
+						<Table.Row>
+							<Table.Head>Name</Table.Head>
+							<Table.Head class="text-center">Punkte</Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each $leaderBoard as user}
+							<Table.Row>
+								<Table.Cell class="line-clamp-1 py-2">{user.username}</Table.Cell>
+								<Table.Cell class="py-2 text-center">{user.points}</Table.Cell>
+							</Table.Row>
+						{:else}
+							<div>
+								<p class="text-center p-2 text-muted-foreground">Keine Spieler angemeldet.</p>
+							</div>
+						{/each}
+					</Table.Body>
+				</Table.Root>
 			{:else}
 				<div>
 					<p class="p-2">Loading data...</p>
@@ -134,18 +150,30 @@
 		</div>
 	</div>
 	<div class="flex flex-1 flex-col items-center">
-		<h2 class="mb-1 text-2xl font-bold">Votes für den {`${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.`}</h2>
+		<h2 class="mb-1 text-2xl font-bold">
+			Votes für den {`${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.`}
+		</h2>
 		{#if voteOver}
-			<p class="mb-8 text-lg font-semibold">Das Voting ist over! Es war: {$event?.expand?.animal.name}</p>
+			<p class="mb-8 text-lg font-semibold">
+				Das Voting ist over! Es war: {$event?.expand?.animal.name}
+			</p>
 		{:else}
-			<p class="mb-8 text-lg font-semibold">Verbleibende Zeit: {`${String(countdown.getHours()).padStart(2, '0')}:${String(countdown.getMinutes()).padStart(2, '0')}:${String(countdown.getSeconds()).padStart(2, '0')}`}</p>
+			<p class="mb-8 text-lg font-semibold">
+				Verbleibende Zeit: {`${String(countdown.getHours()).padStart(2, '0')}:${String(countdown.getMinutes()).padStart(2, '0')}:${String(countdown.getSeconds()).padStart(2, '0')}`}
+			</p>
 		{/if}
 		{#if vote}
-			<p class="text-lg mb-4">Du Tippst auf: {vote.expand?.animal.name}</p>
+			<p class="mb-4 text-lg">Du Tippst auf: {vote.expand?.animal.name}</p>
 		{/if}
 
 		<div class="flex gap-2">
-			<Popover.Root bind:open onOpenChange={() => {lazyLoadingNumber = 50}} let:ids>
+			<Popover.Root
+				bind:open
+				onOpenChange={() => {
+					lazyLoadingNumber = 50;
+				}}
+				let:ids
+			>
 				<Popover.Trigger asChild let:builder>
 					<Button
 						builders={[builder]}
@@ -160,7 +188,11 @@
 				</Popover.Trigger>
 				<Popover.Content class="w-[200px] overflow-hidden p-0">
 					<Command.Root shouldFilter={false}>
-						<Command.Input bind:value={animalSearchValue}  on:input={() => lazyLoadingNumber = 50} placeholder="Suche ein Tier..." />
+						<Command.Input
+							bind:value={animalSearchValue}
+							on:input={() => (lazyLoadingNumber = 50)}
+							placeholder="Suche ein Tier..."
+						/>
 						<Command.Empty>Kein Tier mit dem Namen "{animalSearchValue}" gefunden.</Command.Empty>
 						<Command.Group>
 							<div class="max-h-96 overflow-y-auto" on:scroll={onSelectScroll}>
@@ -183,44 +215,50 @@
 					</Command.Root>
 				</Popover.Content>
 			</Popover.Root>
-			<Button variant="default" on:click={() => voteForAnimal(selectedEntry?.value ?? "")} disabled={voteOver}>Hinzufügen</Button>
+			<Button
+				variant="default"
+				on:click={() => voteForAnimal(selectedEntry?.value ?? '')}
+				disabled={voteOver}>Hinzufügen</Button
+			>
 		</div>
 
-		<div class="mt-4 grid w-max rounded-sm border">
+		<div class="mt-4">
 			{#if $tips}
-				<div class="flex w-full items-center justify-between gap-2 border-b py-1 last:border-b-0">
-					<div class="flex items-center">
-						<p class="w-14 text-center font-semibold">Votes</p>
-						<span class="h-8 w-[1px] bg-border"></span>
-					</div>
-					<p class="w-full font-semibold">Tier</p>
-					<div class="flex items-center">
-						<span class="h-8 w-[1px] bg-border"></span>
-						<div class="h-10 w-10"></div>
-					</div>
-				</div>
-				{#each $tips as tip}
-					<div class="flex w-full items-center justify-between gap-2 border-b py-1 last:border-b-0">
-						<div class="flex items-center">
-							<p class="w-14 text-center">{tip.count}</p>
-							<span class="h-8 w-[1px] bg-border"></span>
-						</div>
-						<p class="w-full">{tip.name}</p>
-						<div class="flex items-center">
-							<span class="h-8 w-[1px] bg-border"></span>
-							<Button
-								variant="ghost"
-								size="icon"
-								on:click={() => voteForAnimal(tip.id)}
-								disabled={vote?.expand?.animal.name === tip.name || voteOver}><ArrowBigUpIcon /></Button
-							>
-						</div>
-					</div>
-				{:else}
-					<div>
-						<p class="text-center p-2 text-muted-foreground">Noch keine Votes vorhanden.</p>
-					</div>
-				{/each}
+				<Table.Root>
+					<Table.Header>
+						<Table.Row>
+							<Table.Head class="text-center">Votes</Table.Head>
+							<Table.Head>Tier</Table.Head>
+							<Table.Head></Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each $tips as tip, i (i)}
+							<Table.Row>
+								<Table.Cell class="py-1 text-center">{tip.count}</Table.Cell>
+								<Table.Cell class="py-1">{tip.name}</Table.Cell>
+								<Table.Cell class="py-1">
+									<Button
+										variant="ghost"
+										size="icon"
+										on:click={() => voteForAnimal(tip.id)}
+										disabled={vote?.expand?.animal.name === tip.name || voteOver}
+										><ArrowBigUpIcon /></Button
+									>
+								</Table.Cell>
+							</Table.Row>
+						{:else}
+							<Table.Row>
+								<Table.Cell></Table.Cell>
+								<Table.Cell>Noch keine Votes vorhanden.</Table.Cell>
+								<Table.Cell></Table.Cell>
+							</Table.Row>
+							<!-- <div>
+								<p class="text-center p-2 text-muted-foreground">Noch keine Votes vorhanden.</p>
+							</div> -->
+						{/each}
+					</Table.Body>
+				</Table.Root>
 			{:else}
 				<div>
 					<p class="p-2">Loading data...</p>

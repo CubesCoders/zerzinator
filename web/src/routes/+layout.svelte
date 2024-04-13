@@ -30,11 +30,11 @@
 
 	const { form: registerFormData, enhance: registerEnhance } = registerForm;
 
-	onMount(() => {
-		fetchEvent();
-		fetchTips();
+	onMount(async () => {
 		fetchLeaderBoard();
 		fetchAnimals();
+		await fetchEvent();
+		fetchTips();
 	})
 </script>
 
