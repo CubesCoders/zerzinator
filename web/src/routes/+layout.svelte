@@ -13,6 +13,8 @@
 	import { loginSchema, registerSchema } from './schema';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { Checkbox } from '@/components/ui/checkbox';
+	import { onMount } from 'svelte';
+	import { fetchAnimals, fetchEvent, fetchLeaderBoard, fetchTips } from '@/store';
 
 	export let data: PageData;
 
@@ -27,6 +29,13 @@
 	});
 
 	const { form: registerFormData, enhance: registerEnhance } = registerForm;
+
+	onMount(async () => {
+		fetchLeaderBoard();
+		fetchAnimals();
+		await fetchEvent();
+		fetchTips();
+	})
 </script>
 
 <div class="w-full border-b">

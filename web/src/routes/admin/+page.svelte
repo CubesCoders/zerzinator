@@ -40,14 +40,15 @@
     }
 
     // if more people tip on the same animal, the points will decrease
-    function getDynamicPoints(points: number, tipCount: number) {
-        return points * (1 / tipCount);
+    function getDynamicPoints(points: number, tipCount: number, maxTips: number) {
+        return points * (1 + Math.pow(tipCount / maxTips, 2));
     }
 
     async function setAnimal() {
         if (!$event) return;
         if (!selectedEntry) return;
         if (!$animals) return;
+        if (!$tips) return;
         if ((Date.now() - date.getTime() + (1000 * 60 * 30)) <= 0) {
             alert('Die Abstimmung ist noch im Gange.');
             return;
@@ -67,23 +68,29 @@
             expand: "user,animal"
         }) as TipsResponse<{user: UsersResponse, animal: AnimalsResponse}>[];
 
-        let tipCount = singleTips.length;
+        let maxTips = singleTips.length;
 
         const animal = $animals.find((animal) => animal.id === entry.value);
         if (!animal) return;
 
         for (const tip of singleTips) {
             if (tip.animal === animal.id) {
+                let tipCount = singleTips.filter((t) => t.animal === animal.id).length;
+                let points = getDynamicPoints(500, tipCount, maxTips);
                 await pb.collection("users").update(tip.user, {
-                    points: (tip.expand?.user?.points ?? 0) + 500
+                    points: (tip.expand?.user?.points ?? 0) + points
                 });
             } else if (tip.expand?.animal?.species === animal.species) {
+                let tipCount = singleTips.filter((t) => t.expand?.animal?.species === animal.species).length;
+                let points = getDynamicPoints(250, tipCount, maxTips);
                 await pb.collection("users").update(tip.user, {
                     points: (tip.expand?.user?.points ?? 0) + 50
                 });
             } else if (tip.expand?.animal?.type === animal.type) {
+                let tipCount = singleTips.filter((t) => t.expand?.animal?.type === animal.type).length;
+                let points = getDynamicPoints(50, tipCount, maxTips);
                 await pb.collection("users").update(tip.user, {
-                    points: (tip.expand?.user?.points ?? 0) + 5
+                    points: (tip.expand?.user?.points ?? 0) + points
                 });
             }
         }
