@@ -12,6 +12,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { loginSchema, registerSchema } from './schema';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+	import { Checkbox } from '@/components/ui/checkbox';
 
 	export let data: PageData;
 
@@ -69,12 +70,12 @@
 					></Dialog.Trigger
 				>
 				<Dialog.Content>
-					<Tabs.Root value="account" class="w-full pr-4">
+					<Tabs.Root value="login" class="w-full pr-4">
 						<Tabs.List class="w-full">
-							<Tabs.Trigger value="account" class="w-full">Log-In</Tabs.Trigger>
-							<Tabs.Trigger value="password" class="w-full">Sign-Up</Tabs.Trigger>
+							<Tabs.Trigger value="login" class="w-full">Einloggen</Tabs.Trigger>
+							<Tabs.Trigger value="signup" class="w-full">Registrieren</Tabs.Trigger>
 						</Tabs.List>
-						<Tabs.Content value="account">
+						<Tabs.Content value="login">
 							<form method="POST" action="?/login" use:loginEnhance>
 								<Form.Field form={loginForm} name="email">
 									<Form.Control let:attrs>
@@ -90,10 +91,10 @@
 									</Form.Control>
 									<Form.FieldErrors />
 								</Form.Field>
-								<Form.Button>Einloggen</Form.Button>
+								<Form.Button class="mt-4">Einloggen</Form.Button>
 							</form>
 						</Tabs.Content>
-						<Tabs.Content value="password">
+						<Tabs.Content value="signup">
 							<form method="POST" action="?/register" use:registerEnhance>
 								<Form.Field form={registerForm} name="email">
 									<Form.Control let:attrs>
@@ -129,7 +130,19 @@
 									</Form.Control>
 									<Form.FieldErrors />
 								</Form.Field>
-								<Form.Button>Registrieren</Form.Button>
+								<!-- <Form.Field form={registerForm} name="acceptTerms" class="flex flex-row items-center space-x-3 space-y-0 p-4">
+									<Form.Control let:attrs>
+										<Checkbox
+											{...attrs}
+											bind:checked={$registerFormData.acceptTerms}
+										/>
+										<Form.Label class="space-y-0">Du akzeptierst den <a class="underline" href="/datenschutz">Datenschutz</a></Form.Label>
+										<input name={attrs.name} value={$registerFormData.acceptTerms} hidden />
+									</Form.Control>
+									<Form.FieldErrors />
+
+								</Form.Field> -->
+								<Form.Button class="mt-4">Registrieren</Form.Button>
 							</form>
 						</Tabs.Content>
 					</Tabs.Root>
@@ -141,9 +154,9 @@
 
 <slot />
 
-<div class="fixed bottom-0 h-12 w-full">
+<div class="fixed bottom-0 h-12 w-full bg-background">
 	<!-- Copyright -->
 	<div class="container flex items-center justify-center h-full">
-		<p class="text-muted-foreground text-sm">© 2024 Markus Hamacher, Idea by Tobias Ebert</p>
+		<p class="text-muted-foreground text-sm">© 2024 Markus Hamacher, Idea by Tobias Ebert | <a class="underline hover:text-foreground" href="/datenschutz">Datenschutz</a></p>
 	</div>
 </div>

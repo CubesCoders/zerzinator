@@ -103,6 +103,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Zerzinator</title>
+</svelte:head>
+
 <div class="container flex py-2 pt-8">
 	<div class="w-48">
 		<h2 class="mb-4 text-xl font-semibold">Leaderboard</h2>

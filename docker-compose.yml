@@ -13,6 +13,8 @@ services:
       - dbdata:/pb/pb_data
       - ./pocketbase/pb_migrations:/pb/pb_migrations
       - ./pocketbase/pb_hooks:/pb/pb_hooks
+    networks:
+      - nginx-network
   web:
     restart: 'always'
     build: 
@@ -27,6 +29,13 @@ services:
     environment:
       PORT: 3001
       PUBLIC_DATABASE: ${PUBLIC_DATABASE:-https://api.cc-web.cloud/zerzinator}
+    networks:
+      - nginx-network
 
 volumes:
   dbdata:
+
+networks:
+  nginx-network:
+    name: nginx-proxy-manager_default
+    external: true
