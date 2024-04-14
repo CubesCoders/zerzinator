@@ -13,7 +13,7 @@ RUN bun run build
 FROM oven/bun
 COPY --from=builder /app/build .
 
-ENV ORIGIN="https://zerzinator.cc-web.cloud"
+ENV ORIGIN="http://zerzinator.cc-web.cloud"
 
 EXPOSE 3001
 
