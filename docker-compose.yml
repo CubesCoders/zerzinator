@@ -29,7 +29,7 @@ services:
     environment:
       PORT: 3001
       PUBLIC_DATABASE: ${PUBLIC_DATABASE:-https://api.cc-web.cloud/zerzinator}
-      ORIGIN: http://zerzinator.cc-web.cloud
+      ORIGIN: https://zerzinator.cc-web.cloud
     networks:
       - nginx-network
 
