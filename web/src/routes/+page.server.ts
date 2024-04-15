@@ -14,9 +14,6 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
     login: async (event) => {
-        console.log(event.request.url)
-        console.log(event.url.origin)
-        console.log(event.url.href)
 
         const form = await superValidate(event, zod(loginSchema));
 
