@@ -28,6 +28,9 @@ FROM node:lts-alpine AS builder
 # A small line inside the image to show who made it
 LABEL Developers="Markus Hamacher"
 
+ARG PUBLIC_DATABASE
+ENV PUBLIC_DATABASE=${PUBLIC_DATABASE}
+
 # The WORKDIR instruction sets the working directory for everything that will happen next
 WORKDIR /usr/src/app
 
