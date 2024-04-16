@@ -40,7 +40,8 @@
 	$: date = new Date($event?.start ?? 0);
 	// countdown
 	$: countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
-	$: voteOver = countdown.getTime() <= 0 || $event?.animal !== undefined;
+	$: voteOver = countdown.getTime() <= 0 || $event?.animal !== "";
+
 
 	setInterval(() => {
 		countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
@@ -93,6 +94,7 @@
 	async function voteForAnimal(tip: string) {
 		if (!data.user) return;
 		if (voteOver) return;
+		if (!$event) return;
 		if (vote) {
 			vote = await pb.collection('tips').update(
 				vote.id,
@@ -103,7 +105,7 @@
 			);
 		} else {
 			vote = await pb.collection('tips').create(
-				{ user: data.user.id, animal: tip },
+				{ user: data.user.id, animal: tip, event: $event.id },
 				{
 					expand: 'animal'
 				}
@@ -117,8 +119,8 @@
 	<title>Zerzinator</title>
 </svelte:head>
 
-<div class="container flex py-2 pt-8">
-	<div class="w-48">
+<div class="container flex lg:flex-row flex-col gap-y-8 lg:gap-y-0 lg:gap-x-8 items-center lg:items-start py-2 pt-8 pb-12">
+	<div class="lg:w-48 w-full">
 		<h2 class="mb-4 text-center text-xl font-semibold">Leaderboard</h2>
 		<div class="mt-4">
 			{#if $leaderBoard}
@@ -149,7 +151,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="flex flex-1 flex-col items-center">
+	<div class="flex flex-1 flex-col items-center order-first lg:order-none w-full">
 		<h2 class="mb-1 text-2xl font-bold">
 			Votes für den {`${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.`}
 		</h2>
@@ -166,7 +168,7 @@
 			<p class="mb-4 text-lg">Du Tippst auf: {vote.expand?.animal.name}</p>
 		{/if}
 
-		<div class="flex gap-2">
+		<div class="flex gap-2 lg:flex-row flex-col">
 			<Popover.Root
 				bind:open
 				onOpenChange={() => {
@@ -222,7 +224,7 @@
 			>
 		</div>
 
-		<div class="mt-4">
+		<div class="mt-4 w-full">
 			{#if $tips}
 				<Table.Root>
 					<Table.Header>
@@ -250,7 +252,7 @@
 						{:else}
 							<Table.Row>
 								<Table.Cell></Table.Cell>
-								<Table.Cell>Noch keine Votes vorhanden.</Table.Cell>
+								<Table.Cell class="text-muted-foreground">Noch keine Votes vorhanden.</Table.Cell>
 								<Table.Cell></Table.Cell>
 							</Table.Row>
 							<!-- <div>
@@ -266,7 +268,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="w-48">
+	<div class="lg:w-48 w-9/12">
 		<h3 class="text-center text-lg">
 			Endlich ist er da, der <span class="font-bold">Zerzinator</span>. Er wurde lang ersehnt und
 			nun beginnt <span class="font-bold">das Spektakel</span>.
