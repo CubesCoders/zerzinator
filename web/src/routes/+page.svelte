@@ -94,6 +94,7 @@
 	async function voteForAnimal(tip: string) {
 		if (!data.user) return;
 		if (voteOver) return;
+		if (!$event) return;
 		if (vote) {
 			vote = await pb.collection('tips').update(
 				vote.id,
@@ -104,7 +105,7 @@
 			);
 		} else {
 			vote = await pb.collection('tips').create(
-				{ user: data.user.id, animal: tip },
+				{ user: data.user.id, animal: tip, event: $event.id },
 				{
 					expand: 'animal'
 				}
