@@ -20,6 +20,13 @@
 		leaderBoard,
 		tips
 	} from '@/store';
+	import { DateTime } from 'luxon';
+
+	function getDateTime(date: string) {
+		date = date.replace(' ', 'T');
+		if (date === "") return DateTime.fromObject({millisecond: 0});
+		return DateTime.fromISO(date).setZone("Europe/Berlin").setLocale('de-DE');
+	}
 
 	export let data: PageData;
 	// let animals: {[keys: string]: string[]} = untypedSpecies;
@@ -37,14 +44,14 @@
 		.filter((animal) => animal.label.toLowerCase().includes(animalSearchValue.toLowerCase()))
 		.slice(0, lazyLoadingNumber);
 
-	$: date = new Date($event?.start ?? 0);
+	$: date = getDateTime($event?.start ?? "");
 	// countdown
-	$: countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
-	$: voteOver = countdown.getTime() <= 0 || $event?.animal !== "";
+	$: countdown = date.diffNow(["hours", "minutes", "seconds"]).plus({minutes: 30});
+	$: voteOver = countdown.toMillis() <= 0 || $event?.animal !== "";
 
 
 	setInterval(() => {
-		countdown = new Date(date.getTime() + 1000 * 60 * 30 - Date.now());
+		countdown = date.diffNow(["hours", "minutes", "seconds"]/* date.toMillis() + 1000 * 60 * 30 - Date.now() */).plus({minutes: 30});
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
@@ -153,7 +160,7 @@
 	</div>
 	<div class="flex flex-1 flex-col items-center order-first lg:order-none w-full">
 		<h2 class="mb-1 text-2xl font-bold">
-			Votes für den {`${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.`}
+			Votes für {date.toFormat("EEEE 'den' dd.MM")}
 		</h2>
 		{#if voteOver}
 			<p class="mb-8 text-lg font-semibold">
@@ -161,7 +168,7 @@
 			</p>
 		{:else}
 			<p class="mb-8 text-lg font-semibold">
-				Verbleibende Zeit: {`${String(countdown.getHours()).padStart(2, '0')}:${String(countdown.getMinutes()).padStart(2, '0')}:${String(countdown.getSeconds()).padStart(2, '0')}`}
+				Verbleibende Zeit: {countdown.toFormat('hh:mm:ss')}
 			</p>
 		{/if}
 		{#if vote}
@@ -279,5 +286,7 @@
 			mit deinen Kumpels und Kumpelinnen und zeige ihnen wer der
 			<span class="font-bold">wahre Zerzinator</span> ist!
 		</h3>
+		<h4 class="text-center font-semibold mt-8">Du hast Ideen oder verbesserungsvorschläge?</h4>
+		<p class="text-center mt-2">Lass es mich <a class="underline text-muted-foreground" href="https://github.com/CubesCoders/zerzinator/discussions">hier</a> wissen.</p>
 	</div>
 </div>
