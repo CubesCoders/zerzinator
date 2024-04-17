@@ -279,5 +279,7 @@
 			mit deinen Kumpels und Kumpelinnen und zeige ihnen wer der
 			<span class="font-bold">wahre Zerzinator</span> ist!
 		</h3>
+		<h4 class="text-center font-semibold mt-8">Du hast Ideen oder verbesserungsvorschläge?</h4>
+		<p class="text-center mt-2">Lass es mich <a class="underline text-muted-foreground" href="https://github.com/CubesCoders/zerzinator/discussions">hier</a> wissen.</p>
 	</div>
 </div>
