@@ -30,6 +30,7 @@ LABEL Developers="Markus Hamacher"
 
 ARG PUBLIC_DATABASE
 ENV PUBLIC_DATABASE=${PUBLIC_DATABASE}
+ENV TZ=Europe/Berlin
 
 # The WORKDIR instruction sets the working directory for everything that will happen next
 WORKDIR /usr/src/app
@@ -59,6 +60,7 @@ RUN npm audit fix
 
 # The USER instruction sets the user name to use as the default user for the remainder of the current stage
 USER node:node
+ENV TZ=Europe/Berlin
 
 COPY --from=builder /usr/src/app/build ./build/
 
