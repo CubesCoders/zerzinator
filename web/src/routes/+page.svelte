@@ -24,8 +24,8 @@
 	import { de } from 'date-fns/locale';
 
 	function getDateTime(date: string) {
-		if (date === "") return toZonedTime(new Date(0), 'Europe/Berlin');
-		return toZonedTime(new Date(date), "Europe/Berlin");
+		if (date === "") return new Date(0);
+		return new Date(new Date(date).getTime() - 1000 * 60 * 60 * 2);
 	}
 
 	export let data: PageData;
@@ -46,7 +46,7 @@
 
 	$: date = getDateTime($event?.start ?? "");
 	// countdown
-	$: countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
+	$: countdown = date.getTime() - Date.now() + 1000 * 60 * 30;
 	$: voteOver = countdown <= 0 || $event?.animal !== "";
 
 	function getCountdownString(countdown: number) {
@@ -59,7 +59,7 @@
 	}
 
 	setInterval(() => {
-		countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
+		countdown = date.getTime() - Date.now() + 1000 * 60 * 30;
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
