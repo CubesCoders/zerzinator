@@ -41,7 +41,7 @@
 
     // if more people tip on the same animal, the points will decrease
     function getDynamicPoints(points: number, tipCount: number, maxTips: number) {
-        return points * (1 + Math.pow(tipCount / maxTips, 2));
+        return points * Math.pow(maxTips / (tipCount + maxTips - 1), 2);
     }
 
     async function setAnimal() {
