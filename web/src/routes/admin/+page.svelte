@@ -19,7 +19,7 @@
 	$: filteredAnimalValues = animalValues.filter((animal) =>
 		animal.label.toLowerCase().includes(animalSearchValue.toLowerCase())
 	).slice(0, lazyLoadingNumber);
-	$: date = DateTime.fromISO($event?.start.replace(" ", "T") ?? "");
+	$: date = DateTime.fromSQL($event?.start ?? "");
 
 	let open = false;
 	let value = '';
