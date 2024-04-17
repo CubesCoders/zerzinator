@@ -30,8 +30,6 @@ services:
       NODE_ENV: production
       PORT: 3001
       PUBLIC_DATABASE: ${PUBLIC_DATABASE:-https://api.cc-web.cloud/zerzinator}
-      TZ: Europe/Berlin
-      NODE_TZ: Europe/Berlin
       # ORIGIN: https://zerzinator.cc-web.cloud
     networks:
       - nginx-network
