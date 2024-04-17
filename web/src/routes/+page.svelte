@@ -23,9 +23,8 @@
 	import { DateTime } from 'luxon';
 
 	function getDateTime(date: string) {
-		date = date.replace(' ', 'T');
 		if (date === "") return DateTime.fromObject({millisecond: 0});
-		return DateTime.fromISO(date).setZone("Europe/Berlin").setLocale('de-DE');
+		return DateTime.fromSQL(date).setZone("Europe/Berlin").setLocale('de-DE');
 	}
 
 	export let data: PageData;
@@ -46,12 +45,13 @@
 
 	$: date = getDateTime($event?.start ?? "");
 	// countdown
-	$: countdown = date.diffNow(["hours", "minutes", "seconds"]).plus({minutes: 30});
+	$: countdown = date.diff(DateTime.now().setZone("Europe/Berlin"), ["hours", "minutes", "seconds"]).plus({minutes: 30});
 	$: voteOver = countdown.toMillis() <= 0 || $event?.animal !== "";
 
 
+
 	setInterval(() => {
-		countdown = date.diffNow(["hours", "minutes", "seconds"]/* date.toMillis() + 1000 * 60 * 30 - Date.now() */).plus({minutes: 30});
+		countdown = date.diff(DateTime.now().setZone("Europe/Berlin"), ["hours", "minutes", "seconds"]/* date.toMillis() + 1000 * 60 * 30 - Date.now() */).plus({minutes: 30});
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
