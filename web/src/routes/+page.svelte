@@ -20,11 +20,12 @@
 		leaderBoard,
 		tips
 	} from '@/store';
-	import { DateTime } from 'luxon';
+	import { format, toZonedTime } from 'date-fns-tz';
+	import { de } from 'date-fns/locale';
 
 	function getDateTime(date: string) {
-		if (date === "") return DateTime.fromObject({millisecond: 0});
-		return DateTime.fromSQL(date).setZone("Europe/Berlin").setLocale('de-DE');
+		if (date === "") return toZonedTime(new Date(0), 'Europe/Berlin');
+		return toZonedTime(new Date(date), "Europe/Berlin");
 	}
 
 	export let data: PageData;
@@ -45,13 +46,20 @@
 
 	$: date = getDateTime($event?.start ?? "");
 	// countdown
-	$: countdown = date.diff(DateTime.now().setZone("Europe/Berlin"), ["hours", "minutes", "seconds"]).plus({minutes: 30});
-	$: voteOver = countdown.toMillis() <= 0 || $event?.animal !== "";
+	$: countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
+	$: voteOver = countdown <= 0 || $event?.animal !== "";
 
+	function getCountdownString(countdown: number) {
+		// only hours minutes and seconds
+		const hours = Math.floor(countdown / (1000 * 60 * 60));
+		const minutes = Math.floor((countdown % (1000 * 60 * 60)) / (1000 * 60));
+		const seconds = Math.floor((countdown % (1000 * 60)) / 1000);
 
+		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+	}
 
 	setInterval(() => {
-		countdown = date.diff(DateTime.now().setZone("Europe/Berlin"), ["hours", "minutes", "seconds"]/* date.toMillis() + 1000 * 60 * 30 - Date.now() */).plus({minutes: 30});
+		countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
@@ -160,7 +168,7 @@
 	</div>
 	<div class="flex flex-1 flex-col items-center order-first lg:order-none w-full">
 		<h2 class="mb-1 text-2xl font-bold">
-			Votes für {date.toFormat("EEEE 'den' dd.MM")}
+			Votes für {format(date, "EEEE 'den' dd.MM.", { locale: de})}
 		</h2>
 		{#if voteOver}
 			<p class="mb-8 text-lg font-semibold">
@@ -168,7 +176,7 @@
 			</p>
 		{:else}
 			<p class="mb-8 text-lg font-semibold">
-				Verbleibende Zeit: {countdown.toFormat('hh:mm:ss')}
+				Verbleibende Zeit: {getCountdownString(countdown)}
 			</p>
 		{/if}
 		{#if vote}
