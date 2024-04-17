@@ -25,4 +25,4 @@ EXPOSE 80
 
 WORKDIR /pb
 
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:80", "--debug"]
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:80", "--dev"]
