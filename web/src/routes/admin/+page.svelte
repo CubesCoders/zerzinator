@@ -9,6 +9,7 @@
 	import { tick } from 'svelte';
 	import { pb } from '@/pocketbase/client';
 	import { type TipsResponse, type AnimalsResponse, type UsersResponse } from '@/pocketbase';
+    import { DateTime } from 'luxon';
 
 	$: animalValues = ($animals ?? []).map((animal) => ({ value: animal.id, label: animal.name }));
 	$: selectedValue =
@@ -18,7 +19,7 @@
 	$: filteredAnimalValues = animalValues.filter((animal) =>
 		animal.label.toLowerCase().includes(animalSearchValue.toLowerCase())
 	).slice(0, lazyLoadingNumber);
-	$: date = new Date($event?.start ?? 0);
+	$: date = DateTime.fromISO($event?.start ?? "");
 
 	let open = false;
 	let value = '';
@@ -49,7 +50,7 @@
         if (!selectedEntry) return;
         if (!$animals) return;
         if (!$tips) return;
-        if ((Date.now() - date.getTime() + (1000 * 60 * 30)) <= 0) {
+        if ((DateTime.now().setZone("Europe/Berlin").toMillis() - date.toMillis() + (1000 * 60 * 30)) <= 0) {
             alert('Die Abstimmung ist noch im Gange.');
             return;
         }
