@@ -19,7 +19,7 @@
 	$: filteredAnimalValues = animalValues.filter((animal) =>
 		animal.label.toLowerCase().includes(animalSearchValue.toLowerCase())
 	).slice(0, lazyLoadingNumber);
-	$: date = DateTime.fromISO($event?.start ?? "");
+	$: date = DateTime.fromISO($event?.start.replace(" ", "T") ?? "");
 
 	let open = false;
 	let value = '';
@@ -50,10 +50,6 @@
         if (!selectedEntry) return;
         if (!$animals) return;
         if (!$tips) return;
-        if ((DateTime.now().setZone("Europe/Berlin").toMillis() - date.toMillis() + (1000 * 60 * 30)) <= 0) {
-            alert('Die Abstimmung ist noch im Gange.');
-            return;
-        }
         if ($event.animal) {
             alert('Ein Tier wurde bereits ausgewählt.');
             return;
@@ -85,7 +81,7 @@
                 let tipCount = singleTips.filter((t) => t.expand?.animal?.species === animal.species).length;
                 let points = getDynamicPoints(250, tipCount, maxTips);
                 await pb.collection("users").update(tip.user, {
-                    points: (tip.expand?.user?.points ?? 0) + 50
+                    points: (tip.expand?.user?.points ?? 0) + points
                 });
             } else if (tip.expand?.animal?.type === animal.type) {
                 let tipCount = singleTips.filter((t) => t.expand?.animal?.type === animal.type).length;
