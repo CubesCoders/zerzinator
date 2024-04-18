@@ -46,7 +46,7 @@
 
 	$: date = getDateTime($event?.start ?? "");
 	// countdown
-	$: countdown = date.getTime() - toZonedTime(Date.now(), "UTC").getTime() + 1000 * 60 * 30;
+	$: countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
 	$: voteOver = countdown <= 0 || $event?.animal !== "";
 
 	function getCountdownString(countdown: number) {
@@ -59,7 +59,7 @@
 	}
 
 	setInterval(() => {
-		countdown = date.getTime() - toZonedTime(Date.now(), "UTC").getTime() + 1000 * 60 * 30;
+		countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
 	}, 1000);
 
 	function closeAndFocusTrigger(triggerId: string) {
