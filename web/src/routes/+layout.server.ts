@@ -1,5 +1,5 @@
 import { superValidate } from "sveltekit-superforms";
-import { loginSchema, registerSchema } from "./schema.js";
+import { loginSchema, registerSchema } from "../lib/components/schema.js";
 import { zod } from "sveltekit-superforms/adapters";
 
 export async function load({ locals }) {
