@@ -91,7 +91,7 @@
 	onMount(async () => {
 		if (data.user) {
 			try {
-				vote = await pb.collection('tips').getFirstListItem(`user="${data.user.id}" and event="${$event?.id}"`, {
+				vote = await pb.collection('tips').getFirstListItem(`user="${data.user.id}" && event="${$event?.id}"`, {
 					expand: 'animal'
 				});
 			} catch (error) {
