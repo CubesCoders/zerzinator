@@ -4,33 +4,37 @@ import type {
 	AnimalsResponse,
 	EventsResponse,
 	LeaderboardResponse,
-	TipsCalcResponse
+	TipsCalcResponse,
+	TipsResponse
 } from './pocketbase';
 import { ClientResponseError } from 'pocketbase';
+import { toast } from 'svelte-sonner';
 
-export const animals: Writable<null | AnimalsResponse<unknown>[]> = writable(null);
+export const animals: Writable<AnimalsResponse<unknown>[]> = writable();
 
 export const fetchAnimals = async () => {
 	try {
 		const res = await pb.collection('animals').getFullList();
 		animals.set(res);
 	} catch (e) {
+		toast.error(`No animals found: ${e}`);
 		console.error(e);
 	}
 };
 
-export const tips: Writable<null | TipsCalcResponse<unknown>[]> = writable(null);
+export const tips: Writable<TipsCalcResponse<unknown>[]> = writable();
 
 export const fetchTips = async () => {
 	try {
 		const res = await pb.collection('tips_calc').getFullList({filter: `event="${get(event)?.id}"`});
 		tips.set(res);
 	} catch (e) {
+		toast.error(`No tips found: ${e}`);
 		console.error(e);
 	}
 };
 
-export const leaderBoard: Writable<null | LeaderboardResponse<unknown>[]> = writable(null);
+export const leaderBoard: Writable<LeaderboardResponse<unknown>[]> = writable();
 
 export const fetchLeaderBoard = async () => {
 	try {
@@ -39,11 +43,12 @@ export const fetchLeaderBoard = async () => {
 		});
 		leaderBoard.set(res);
 	} catch (e) {
+		toast.error(`No leaderboard found: ${e}`);
 		console.error(e);
 	}
 };
 
-export const event: Writable<null | EventsResponse<{ animal: AnimalsResponse }>> = writable(null);
+export const event: Writable<EventsResponse<{ animal: AnimalsResponse }>> = writable();
 
 export const fetchEvent = async () => {
 	// current date in "YYYY-mm-dd H:i:s" format
@@ -59,8 +64,15 @@ export const fetchEvent = async () => {
 			.getFirstListItem(`start > "${beginTime}" && end < "${stopTime}"`, {
 				sort: '+start',
 				expand: 'animal'
-			});
-		event.set(res as EventsResponse<{ animal: AnimalsResponse }>);
+			}) as EventsResponse<{ animal: AnimalsResponse }>;
+		event.set(res);
+		const countdownStart = new Date(res.start).getTime() - new Date().getTime();
+		countdown.set(countdownStart);
+		if (countdownStart > 0) {
+			startCountdown();
+		}
+		fetchGuess(res);
+		fetchTips();
 	} catch (e: unknown) {
         // console.log(e instanceof ClientResponseError, e.name, e);
 		if (e instanceof ClientResponseError && e.name === "ClientResponseError 404") {
@@ -72,9 +84,47 @@ export const fetchEvent = async () => {
 						expand: 'animal'
 					})) as EventsResponse<{ animal: AnimalsResponse }>;
 				event.set(res);
+				const countdownStart = new Date(res.start).getTime() - new Date().getTime();
+				countdown.set(countdownStart);
+				if (countdownStart > 0) {
+					startCountdown();
+				}
+				fetchGuess(res);
+				fetchTips();
 			} catch (e) {
+				toast.error(`No event found: ${e}`);
 				console.error(e);
 			}
 		}
 	}
+};
+
+export const guess: Writable<TipsResponse<{animal: AnimalsResponse}>> = writable();
+
+const fetchGuess = async (event: EventsResponse<{animal: AnimalsResponse}>) => {
+	const user = pb.authStore.model;
+	if (!user) return;
+
+	try {
+		const res = await pb.collection('tips').getFirstListItem(`event="${event.id}" && user="${user.id}"`, {expand: "animal"});
+		guess.set(res as TipsResponse<{animal: AnimalsResponse}>);
+	} catch (e) {
+		console.error(e);
+	}
+};
+
+export const countdown: Writable<number> = writable();
+
+const startCountdown = () => {
+	const interval = setInterval(() => {
+		countdown.update((time) => {
+			if (time <= 0) {
+				console.log('Event ended');
+				clearInterval(interval);
+				fetchEvent();
+				return 0;
+			}
+			return time - 1000;
+		});
+	}, 1000);
 };

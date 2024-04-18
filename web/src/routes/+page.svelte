@@ -1,133 +1,12 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
-	// import untypedSpecies from '../assets/animals.json';
-	import * as Popover from '@/components/ui/popover';
-	import * as Command from '@/components/ui/command';
 	import * as Table from '@/components/ui/table';
-	import { Button } from '@/components/ui/button';
-	import { ArrowBigUpIcon, ChevronsUpDown, Check, UserRoundIcon } from 'lucide-svelte';
-	import { cn } from '@/utils';
-	import { pb } from '@/pocketbase/client';
 	import type { PageData } from './$types';
-	import type { AnimalsRecord, AnimalsResponse, TipsResponse } from '@/pocketbase';
 	import {
-		animals,
-		event,
-		fetchAnimals,
-		fetchEvent,
-		fetchLeaderBoard,
-		fetchTips,
 		leaderBoard,
-		tips
 	} from '@/store';
-	import { format, toZonedTime } from 'date-fns-tz';
-	import { de } from 'date-fns/locale';
-
-	function getDateTime(date: string) {
-		if (date === "") return new Date(0);
-		return new Date(new Date(date).getTime() - 1000 * 60 * 60 * 2);
-	}
+	import GuesserWrapper from '@/components/GuesserWrapper.svelte';
 
 	export let data: PageData;
-	// let animals: {[keys: string]: string[]} = untypedSpecies;
-
-	$: animalValues = ($animals ?? []).map((animal) => ({ value: animal.id, label: animal.name }));
-
-	let open = false;
-	let value = '';
-	let animalSearchValue = '';
-
-	$: selectedValue = selectedEntry?.label ?? 'Wähle ein neues Tier aus...';
-	$: selectedEntry = animalValues.find((animal) => animal.value === value);
-	$: lazyLoadingNumber = 50;
-	$: filteredAnimalValues = animalValues
-		.filter((animal) => animal.label.toLowerCase().includes(animalSearchValue.toLowerCase()))
-		.slice(0, lazyLoadingNumber);
-
-	$: date = getDateTime($event?.start ?? "");
-	// countdown
-	$: countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
-	$: voteOver = countdown <= 0 || $event?.animal !== "";
-
-	function getCountdownString(countdown: number) {
-		// only hours minutes and seconds
-		const hours = Math.floor(countdown / (1000 * 60 * 60));
-		const minutes = Math.floor((countdown % (1000 * 60 * 60)) / (1000 * 60));
-		const seconds = Math.floor((countdown % (1000 * 60)) / 1000);
-
-		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-	}
-
-	setInterval(() => {
-		countdown = date.getTime() - toZonedTime(Date.now(), "Europe/Berlin").getTime() + 1000 * 60 * 30;
-	}, 1000);
-
-	function closeAndFocusTrigger(triggerId: string) {
-		open = false;
-		tick().then(() => {
-			document.getElementById(triggerId)?.focus();
-		});
-	}
-
-	function onSelectScroll(e: any) {
-		if (!e.target) return;
-		if (!(e.target instanceof HTMLElement)) return;
-		if (e.target.scrollHeight - e.target.scrollTop <= e.target.clientHeight + 100) {
-			lazyLoadingNumber += 50;
-		}
-	}
-
-	let vote: undefined | TipsResponse<{ animal: AnimalsResponse }> = undefined;
-
-	/* function parseAnimals() {
-		for (const specie of Object.keys(animals)) {
-			if (!animals.hasOwnProperty(specie)) continue;
-			for (const animal of animals[specie]) {
-				animalValues.push({ value: animal.toLowerCase().replace(/\s/g, '-'), label: animal });
-			}
-		}
-	} */
-
-	onMount(async () => {
-		if (data.user) {
-			try {
-				vote = await pb.collection('tips').getFirstListItem(`user="${data.user.id}" && event="${$event?.id}"`, {
-					expand: 'animal'
-				});
-			} catch (error) {
-				vote = undefined;
-				console.error(error);
-			}
-		}
-
-		/* if (!$animals) {
-			await fetchAnimals();
-			animalValues = 
-		} */
-	});
-
-	async function voteForAnimal(tip: string) {
-		if (!data.user) return;
-		if (voteOver) return;
-		if (!$event) return;
-		if (vote) {
-			vote = await pb.collection('tips').update(
-				vote.id,
-				{ animal: tip },
-				{
-					expand: 'animal'
-				}
-			);
-		} else {
-			vote = await pb.collection('tips').create(
-				{ user: data.user.id, animal: tip, event: $event.id },
-				{
-					expand: 'animal'
-				}
-			);
-		}
-		fetchTips();
-	}
 </script>
 
 <svelte:head>
@@ -166,135 +45,21 @@
 			{/if}
 		</div>
 	</div>
-	<div class="flex flex-1 flex-col items-center order-first lg:order-none w-full">
-		<h2 class="mb-1 text-2xl font-bold">
-			Votes für {format(date, "EEEE 'den' dd.MM.", { locale: de})}
-		</h2>
-		{#if voteOver}
-			<p class="mb-8 text-lg font-semibold">
-				Das Voting ist over! Es war: {$event?.expand?.animal.name}
-			</p>
-		{:else}
-			<p class="mb-8 text-lg font-semibold">
-				Verbleibende Zeit: {getCountdownString(countdown)}
-			</p>
-		{/if}
-		{#if vote}
-			<p class="mb-4 text-lg">Du Tippst auf: {vote.expand?.animal.name}</p>
-		{/if}
-
-		<div class="flex gap-2 lg:flex-row flex-col">
-			<Popover.Root
-				bind:open
-				onOpenChange={() => {
-					lazyLoadingNumber = 50;
-				}}
-				let:ids
-			>
-				<Popover.Trigger asChild let:builder>
-					<Button
-						builders={[builder]}
-						variant="outline"
-						role="combobox"
-						aria-expanded={open}
-						class="max-w-96 justify-between"
-					>
-						{selectedValue}
-						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-					</Button>
-				</Popover.Trigger>
-				<Popover.Content class="w-[200px] overflow-hidden p-0">
-					<Command.Root shouldFilter={false}>
-						<Command.Input
-							bind:value={animalSearchValue}
-							on:input={() => (lazyLoadingNumber = 50)}
-							placeholder="Suche ein Tier..."
-						/>
-						<Command.Empty>Kein Tier mit dem Namen "{animalSearchValue}" gefunden.</Command.Empty>
-						<Command.Group>
-							<div class="max-h-96 overflow-y-auto" on:scroll={onSelectScroll}>
-								{#each filteredAnimalValues as animal}
-									<Command.Item
-										value={animal.value}
-										onSelect={(currentValue) => {
-											value = currentValue;
-											closeAndFocusTrigger(ids.trigger);
-										}}
-									>
-										<Check
-											class={cn('mr-2 h-4 w-4', value !== animal.value && 'text-transparent')}
-										/>
-										{animal.label}
-									</Command.Item>
-								{/each}
-							</div>
-						</Command.Group>
-					</Command.Root>
-				</Popover.Content>
-			</Popover.Root>
-			<Button
-				variant="default"
-				on:click={() => voteForAnimal(selectedEntry?.value ?? '')}
-				disabled={voteOver}>Hinzufügen</Button
-			>
-		</div>
-
-		<div class="mt-4 w-full">
-			{#if $tips}
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head class="text-center">Votes</Table.Head>
-							<Table.Head>Tier</Table.Head>
-							<Table.Head></Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each $tips as tip, i (i)}
-							<Table.Row>
-								<Table.Cell class="py-1 text-center">{tip.count}</Table.Cell>
-								<Table.Cell class="py-1">{tip.name}</Table.Cell>
-								<Table.Cell class="py-1">
-									<Button
-										variant="ghost"
-										size="icon"
-										on:click={() => voteForAnimal(tip.id)}
-										disabled={vote?.expand?.animal.name === tip.name || voteOver}
-										><ArrowBigUpIcon /></Button
-									>
-								</Table.Cell>
-							</Table.Row>
-						{:else}
-							<Table.Row>
-								<Table.Cell></Table.Cell>
-								<Table.Cell class="text-muted-foreground">Noch keine Votes vorhanden.</Table.Cell>
-								<Table.Cell></Table.Cell>
-							</Table.Row>
-							<!-- <div>
-								<p class="text-center p-2 text-muted-foreground">Noch keine Votes vorhanden.</p>
-							</div> -->
-						{/each}
-					</Table.Body>
-				</Table.Root>
-			{:else}
-				<div>
-					<p class="p-2">Loading data...</p>
-				</div>
-			{/if}
-		</div>
+	<div class="flex-1 order-first lg:order-none">
+		<GuesserWrapper user={data.user} loginForm={data.loginForm} registerForm={data.registerForm} />
 	</div>
 	<div class="lg:w-48 w-9/12">
 		<h3 class="text-center text-lg">
 			Endlich ist er da, der <span class="font-bold">Zerzinator</span>. Er wurde lang ersehnt und
 			nun beginnt <span class="font-bold">das Spektakel</span>.
-			<span class="font-bold">Vote</span>
-			jetzt für ein Tier und sei der
+			<span class="font-bold">Tippe</span>
+			jetzt auf ein Tier und sei der
 			<span class="font-bold">glückliche Gewinner</span>, oder auch nicht.
 			<span class="font-bold">Messe dich</span>
 			mit deinen Kumpels und Kumpelinnen und zeige ihnen wer der
 			<span class="font-bold">wahre Zerzinator</span> ist!
 		</h3>
-		<h4 class="text-center font-semibold mt-8">Du hast Ideen oder verbesserungsvorschläge?</h4>
+		<h4 class="text-center font-semibold mt-8">Du hast Ideen oder Verbesserungsvorschläge?</h4>
 		<p class="text-center mt-2">Lass es mich <a class="underline text-muted-foreground" href="https://github.com/CubesCoders/zerzinator/discussions">hier</a> wissen.</p>
 	</div>
 </div>

@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms";
 import type { Actions, PageServerLoad } from "./$types.js";
-import { loginSchema, registerSchema } from "./schema.js";
+import { loginSchema, registerSchema } from "../lib/components/schema.js";
 import { zod } from "sveltekit-superforms/adapters";
 import { fail } from "@sveltejs/kit";
 
